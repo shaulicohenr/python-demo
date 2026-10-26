@@ -1,40 +1,35 @@
-
 pipeline{
     agent any
     stages{
-        stage("Checkout Code"){
+        stage('Hello'){
             steps{
-                git branch: 'main', url:'https://github.com/berezovsky13/python-DevOps-Course.git'
+                echo "Hello world"
             }
         }
-        
-        stage("Docker Build+Tag"){
+        stage('checkout code'){
             steps{
-                sh 'docker build -t berezovsky8/python-demo:1.0.3 .'
+                git branch: 'main', url: 'https://github.com/shaulicohenr/python-demo'           
+                sh "ls -la"
             }
         }
-        
-        stage("Trivy Scan"){
+        stage('docker build'){
             steps{
-                sh 'trivy image berezovsky8/python-demo:1.0.3'
+                sh "docker build -t shaulicohenr/python-demo:1.0.3 ."
             }
         }
-
         stage("Docker Push"){
             steps{
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]){
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push berezovsky8/python-demo:1.0.3
+                        docker push shaulicohenr/python-demo:1.0.3
                     '''
-                    
                 }
             }
         }
-        
         stage("Docker Run"){
             steps{
-                sh 'docker run python-demo:1.0.1'
+                sh 'docker run shaulicohenr/python-demo:1.0.3'
             }
         }
     }
